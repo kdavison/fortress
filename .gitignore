@@ -28,6 +28,9 @@
 *.out
 *.app
 
-# Cmake intermediates
+# CMake stuff
 CMakeCache.txt
 CMakeFiles/
+
+#ignore output directory
+out.*/
