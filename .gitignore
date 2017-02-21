@@ -34,3 +34,8 @@ CMakeFiles/
 
 #ignore output directory
 out.*/
+
+#ignore artifact directoty
+artifact/include/*
+artifact/lib/*
+artifact/bin/*

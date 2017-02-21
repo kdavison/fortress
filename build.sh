@@ -8,4 +8,7 @@ else
 BUILD=$(pwd)/${BUILD}
 fi
 
-cd ${BUILD} && cmake ../
+cd ${BUILD}
+cmake ../
+make
+make install
