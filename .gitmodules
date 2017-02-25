@@ -3,4 +3,4 @@
 	url = https://github.com/jbeder/yaml-cpp.git
 [submodule "external/entityx"]
 	path = external/entityx
-	url = git@github.com:alecthomas/entityx.git
+	url = git@github.com:kdavison/entityx.git
