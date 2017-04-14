@@ -33,7 +33,7 @@ CMakeCache.txt
 CMakeFiles/
 
 #ignore output directory
-build.*/
+cmake.*/
 
 #ignore artifact directoty
 artifact/include/*
