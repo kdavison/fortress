@@ -33,3 +33,15 @@ ExternalProject_Add_Step(
   EntityX install
   DEPENDEES install
 )
+
+## SPEED LOG (spdlog)
+ExternalProject_Add( spdlog
+  CMAKE_ARGS -DSPDLOG_BUILD_TESTING=OFF -DCMAKE_INSTALL_PREFIX=${EXTERNAL_LIBRARY_PREFIX}
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/spdlog"
+)
+
+ExternalProject_Add_Step(
+  spdlog install
+  DEPENDEES install
+)
+
