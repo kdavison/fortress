@@ -1,0 +1,71 @@
+#!/bin/bash
+
+BUILD_DIRECTORY_PREFIX=cmake
+
+function get_cmake_directory()
+{
+  PREFIX=${BUILD_DIRECTORY_PREFIX}
+  BUILD=$(find * -type d -name "${PREFIX}.*")
+  if [ -z "${BUILD}" ]
+  then
+    echo ""
+    exit 0
+  fi
+  echo "${BUILD}"
+}
+
+function get_or_make_cmake_directory()
+{
+  PREFIX=${BUILD_DIRECTORY_PREFIX}
+  BUILD=$(find * -type d -name "${PREFIX}.*")
+  if [ -z "${BUILD}" ]
+  then
+    BUILD=$(mktemp -d --tmpdir=$(pwd) -t ${PREFIX}.XXXXXXXX)
+  else
+    BUILD=$(pwd)/${BUILD}
+  fi
+  echo ${BUILD}
+}
+
+function show_help()
+{
+  echo "help"
+  echo "  build - do both cmake and make"
+  echo "  cmake - just cmake"
+  echo "  make  - just make"
+}
+
+if [ $# -eq 0 ]
+then
+  show_help
+else
+  for key in "$@"
+  do
+    case $key in
+      build)
+        cd $(get_or_make_cmake_directory)
+        cmake ../
+        make
+        ;;    
+      cmake)
+        cd $(get_or_make_cmake_directory)
+        cmake ../
+        ;;    
+      make)
+        cd $(get_or_make_cmake_directory)
+        make
+        ;;
+      clean)
+        CMAKE_DIRECTORY=$(get_cmake_directory)
+        if [ -z "${CMAKE_DIRECTORY}" ]
+        then
+          make clean
+        fi
+        ;;   
+      *)
+        show_help
+        ;;
+    esac
+    shift
+  done
+fi
