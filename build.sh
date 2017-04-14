@@ -1,9 +1,10 @@
 #!/bin/bash
 
-BUILD=$(find * -type d -name "out.*")
+BUILD_PREFIX=build
+BUILD=$(find * -type d -name "${BUILD_PREFIX}.*")
 if [ -z "${BUILD}" ]
 then
-BUILD=$(mktemp -d --tmpdir=$(pwd) -t out.XXXXXXXX)
+BUILD=$(mktemp -d --tmpdir=$(pwd) -t ${BUILD_PREFIX}.XXXXXXXX)
 else
 BUILD=$(pwd)/${BUILD}
 fi
