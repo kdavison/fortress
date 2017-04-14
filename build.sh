@@ -9,10 +9,5 @@ BUILD=$(pwd)/${BUILD}
 fi
 
 cd ${BUILD}
-cmake \
-  -DYAML_CPP_BUILD_TOOLS:BOOL=OFF \
-  -DENTITYX_BUILD_TESTING:BOOL=OFF \
-  -DENTITYX_BUILD_SHARED:BOOL=OFF \
-  ../
+cmake ../
 make
-make install
