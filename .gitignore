@@ -39,3 +39,8 @@ cmake.*/
 artifact/include/*
 artifact/lib/*
 artifact/bin/*
+artifact/share
+
+#ignore specific external projects
+##SDL
+external/SDL*

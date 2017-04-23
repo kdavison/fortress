@@ -33,6 +33,7 @@ function show_help()
   echo "  build - do both cmake and make"
   echo "  cmake - just cmake"
   echo "  make  - just make"
+  echo "  clean - make clean..."
 }
 
 if [ $# -eq 0 ]
@@ -53,7 +54,7 @@ else
         ;;    
       make)
         cd $(get_or_make_cmake_directory)
-        make
+        make -j $(nproc)
         ;;
       clean)
         CMAKE_DIRECTORY=$(get_cmake_directory)
