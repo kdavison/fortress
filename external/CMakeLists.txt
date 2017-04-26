@@ -6,24 +6,20 @@ set(GOOGLETEST_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_googletest
+  project_googletest
   CMAKE_ARGS "${GOOGLETEST_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/googletest"
+  BUILD_COMMAND $(MAKE)
+  INSTALL_COMMAND $(MAKE) install
 )
-#add_custom_target(trigger_googletest)
-#add_dependencies(trigger_googletest external_googletest)
-add_library(gmock STATIC IMPORTED)
-add_library(gtest STATIC IMPORTED)
-add_library(gmock_main STATIC IMPORTED)
-add_library(gtest_main STATIC IMPORTED)
-set_property(TARGET gmock PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-set_property(TARGET gtest PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-set_property(TARGET gmock_main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-set_property(TARGET gtest_main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set_property(TARGET gmock PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libgmock.a)
+set_property(TARGET gtest PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libgtest.a)
+set_property(TARGET gmock_main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libgmock_main.a)
+set_property(TARGET gtest_main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libgtest_main.a)
 add_dependencies(gmock gmock_main)
 add_dependencies(gtest gtest_main)
-add_dependencies(gmock_main external_googletest)
-add_dependencies(gtest_main external_googletest)
+add_dependencies(gmock_main project_googletest)
+add_dependencies(gtest_main project_googletest)
 
 ## YAML-CPP
 set(YAML_OPTIONS
@@ -35,10 +31,7 @@ ExternalProject_Add(
   CMAKE_ARGS "${YAML_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/yaml-cpp"
 )
-#add_custom_target(trigger_yamlcpp)
-#add_dependencies(trigger_yamlcpp external_yamlcpp)
-add_library(yaml-cpp STATIC IMPORTED)
-set_property(TARGET yaml-cpp PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set_property(TARGET yaml-cpp PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libyaml-cpp.a)
 add_dependencies(yaml-cpp external_yamlcpp)
 
 ## ENTITY-X
@@ -48,15 +41,12 @@ set(ENTITY_X_OPTIONS
     -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_entityx
+  project_entityx
   CMAKE_ARGS "${ENTITY_X_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/entityx"
 )
-#add_custom_target(trigger_entityx)
-#add_dependencies(trigger_entityx external_entityx)
-add_library(entityx STATIC IMPORTED)
-set_property(TARGET entityx PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-add_dependencies(entityx external_entityx)
+set_property(TARGET entityx PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libentityx.a)
+add_dependencies(entityx project_entityx)
 
 ## SPEED LOG (spdlog)
 set(SPEED_LOG_OPTIONS
@@ -64,12 +54,12 @@ set(SPEED_LOG_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY} 
 )
 ExternalProject_Add(
-  external_spdlog
+  project_spdlog
   CMAKE_ARGS "${SPEED_LOG_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/spdlog"
 )
 add_custom_target(spdlog)
-add_dependencies(spdlog external_spdlog)
+add_dependencies(spdlog project_spdlog)
 
 ## PROTOBUF
 set(PROTOBUF_CMAKE_OPTIONS
@@ -78,7 +68,7 @@ set(PROTOBUF_CMAKE_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_protobuf
+  project_protobuf
   CMAKE_ARGS "${PROTOBUF_CMAKE_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/protobuf"
   CONFIGURE_COMMAND ./autogen.sh COMMAND ./configure --disable-shared --prefix=${ARTIFACT_DIRECTORY}
@@ -87,11 +77,9 @@ ExternalProject_Add(
   TEST_BEFORE_INSTALL 1
   TEST_COMMAND $(MAKE) check
 )
-#add_custom_target(trigger_protobuf)
-#add_dependencies(trigger_protobuf external_protobuf)
-add_library(protobuf SHARED IMPORTED)
-set_property(TARGET protobuf PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-add_dependencies(protobuf external_protobuf)
+
+set_property(TARGET protobuf PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libprotobuf.so)
+add_dependencies(protobuf project_protobuf)
 
 ## GAINPUT
 set(GAINPUT_CMAKE_OPTIONS
@@ -101,22 +89,19 @@ set(GAINPUT_CMAKE_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_gainput
+  project_gainput
   CMAKE_ARGS "${GAINPUT_CMAKE_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/gainput"
 )
-#add_custom_target(trigger_gainput)
-#add_dependencies(trigger_gainput external_gainput)
-add_library(gainputstatic STATIC IMPORTED)
-set_property(TARGET gainputstatic PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-add_dependencies(gainputstatic external_gainput)
+set_property(TARGET gainput PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libgainputstatic.a)
+add_dependencies(gainput project_gainput)
 
 ## SDL 2.0
 set(SDL2_CMAKE_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_sdl2
+  project_sdl2
   URL https://www.libsdl.org/release/SDL2-2.0.5.tar.gz
   CMAKE_ARGS "${SDL2_CMAKE_OPTIONS}"
   CONFIGURE_COMMAND ./configure --prefix=${ARTIFACT_DIRECTORY}
@@ -124,14 +109,10 @@ ExternalProject_Add(
   BUILD_COMMAND ${MAKE}
   BUILD_IN_SOURCE 1
 )
-#add_custom_target(trigger_sdl2)
-#add_dependencies(trigger_sdl2 external_sdl2)
-add_library(SDL2 STATIC IMPORTED)
-add_library(SDL2main STATIC IMPORTED)
-set_property(TARGET SDL2 PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-set_property(TARGET SDL2main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+set_property(TARGET SDL2 PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libSDL2.a)
+set_property(TARGET SDL2main PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libSDL2main.a)
 add_dependencies(SDL2 SDL2main)
-add_dependencies(SDL2main external_sdl2)
+add_dependencies(SDL2main project_sdl2)
 
 ## SDL2pp SDL2 Wrapper
 set(SDL2PP_CMAKE_OPTIONS
@@ -144,16 +125,13 @@ set(SDL2PP_CMAKE_OPTIONS
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
 ExternalProject_Add(
-  external_sdl2pp
+  project_sdl2pp
   CMAKE_ARGS "${SDL2PP_CMAKE_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/libSDL2pp"
   BUILD_COMMAND ${MAKE}
   BUILD_IN_SOURCE 1
 )
-#add_custom_target(trigger_sdl2pp)
-#add_dependencies(trigger_sdl2pp trigger_sdl2 external_sdl2pp)
-add_library(SDL2pp SHARED IMPORTED)
-set_property(TARGET SDL2pp PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-add_dependencies(SDL2pp external_sdl2 external_sdl2pp)
+set_property(TARGET SDL2pp PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libSDL2pp.so)
+add_dependencies(SDL2pp project_sdl2 project_sdl2pp)
 
 

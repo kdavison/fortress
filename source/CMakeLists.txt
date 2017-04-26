@@ -38,5 +38,6 @@ target_link_libraries(
   SDL2pp  
   SDL2
   SDL2main
+  dl
   ${LIBRARY_PTHREAD}
 )
