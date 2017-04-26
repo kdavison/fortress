@@ -1,34 +1,33 @@
 cmake_minimum_required (VERSION 3.5)
 
-project(fortress.test)
+set(PROJECT_TEST ${PROJECT_NAME}.test)
 
 set(SOURCE
   ${SOURCE}
   main.cxx
 )
 
-set(LIBS
-  gmock
-  gtest
-  gmock_main
-  gtest_main
-)
+add_executable(${PROJECT_TEST} ${SOURCE})
 
-add_executable(fortress.test ${SOURCE})
+get_property(test TARGET gmock PROPERTY IMPORTED_LOCATION)
+message(STATUS ${test})
 
 target_compile_options(
-  fortress.test PUBLIC
+  ${PROJECT_TEST} PUBLIC
   ${COMPILE_PTHREAD}
 )
 
 target_include_directories(
-  fortress.test PUBLIC
+  ${PROJECT_TEST} PUBLIC
   ${ARTIFACT_DIRECTORY}/include
 )
 
-find_library(LIBRARIES NAMES ${LIBS} PATHS ${ARTIFACT_DIRECTORY}/lib)
+link_directories(${CMAKE_SOURCE_DIR}/artifact/lib)
 target_link_libraries(
-  fortress.test
-  ${LIBRARIES}
+  ${PROJECT_TEST}
+  gmock
+  gtest
+  gmock_main
+  gtest_main
   ${LIBRARY_PTHREAD}
 )
