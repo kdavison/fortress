@@ -40,4 +40,5 @@ artifact/*
 
 #ignore specific external projects
 ##SDL
-external/SDL*
+external/SDL2-*
+external/ex-project*

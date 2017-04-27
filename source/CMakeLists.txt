@@ -34,7 +34,7 @@ target_include_directories(
 )
 
 target_link_libraries(
-  ${PROJECT_NAME}
+  ${PROJECT_NAME} PUBLIC
   SDL2pp  
   SDL2
   SDL2main

@@ -6,6 +6,8 @@ int main()
 {
   auto console = spdlog::stdout_color_mt("console");
 
+  console->info(PROJECT_NAME " version " PROJECT_VERSION);
+
   try
   {
     SDL2pp::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
