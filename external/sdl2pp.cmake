@@ -8,7 +8,11 @@ set(SDL2PP_CMAKE_OPTIONS
   -DSDL2PP_WITH_EXAMPLES=OFF
   -DSDL2PP_WITH_TESTS=OFF
   -DSDL2PP_ENABLE_LIVE_TESTS=OFF
+
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
+  -DCMAKE_SKIP_BUILD_RPATH=FALSE
+  -DCMAKE_BUILD_WITH_INSTALL_RPATH=FALSE
+  -DCMAKE_INSTALL_RPATH=${ARTIFACT_DIRECTORY}/lib
 )
 ExternalProject_Add(
   project_sdl2pp
@@ -18,13 +22,8 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
 )
 
-ExternalProject_Get_Property(project_sdl2 install_dir)
-include_directories( ${install_dir}/include/SDL2pp )
-
-set(CMAKE_INSTALL_RPATH "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
+include_directories( ${ARTIFACT_DIRECTORY}/include/SDL2pp )
 add_library(SDL2pp STATIC IMPORTED)
 set_property(TARGET SDL2pp PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libSDL2pp.so)
 add_dependencies(SDL2pp project_sdl2pp)
-add_dependencies(project_sdl2pp SDL2)
+add_dependencies(project_sdl2pp project_sdl2)

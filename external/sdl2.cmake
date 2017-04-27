@@ -14,9 +14,6 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
 )
 
-ExternalProject_Get_Property(project_sdl2 install_dir)
-include_directories( ${install_dir}/include/SDL2 )
-
 add_library(SDL2 STATIC IMPORTED)
 add_library(SDL2main STATIC IMPORTED)
 set_property(TARGET SDL2 PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libSDL2.a)

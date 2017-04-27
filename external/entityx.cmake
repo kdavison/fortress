@@ -11,6 +11,7 @@ ExternalProject_Add(
   CMAKE_ARGS "${ENTITY_X_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/entityx"
 )
+
 add_library(entityx STATIC IMPORTED)
 set_property(TARGET entityx PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libentityx.a)
 add_dependencies(entityx project_entityx)

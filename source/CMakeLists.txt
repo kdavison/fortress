@@ -33,6 +33,10 @@ target_include_directories(
   ${INCLUDE_DIRECTORIES}
 )
 
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+set(CMAKE_INSTALL_RPATH "${ARTIFACT_DIRECTORY}/lib")
+
 target_link_libraries(
   ${PROJECT_NAME} PUBLIC
   SDL2pp  

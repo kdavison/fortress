@@ -8,6 +8,9 @@ set(SOURCE
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
+add_dependencies(${PROJECT_NAME}
+  project_googletest
+)
 
 target_compile_options(
   ${PROJECT_NAME} PUBLIC
