@@ -1,29 +1,46 @@
 #include <spdlog/spdlog.h>
 #include <SDL2/SDL.h>
-#include <SDL2pp/SDL2pp.hh>
+#include <SDL2/SDL_syswm.h>
+#include <SDL2/SDL_opengl.h>
+#include <GL/gl.h>
+
+#include "input/input.h"
+
+#include <functional>
+#include <unordered_map>
+#include <thread>
+#include <chrono>
+#include <cmath>
 
 int main()
 {
   auto console = spdlog::stdout_color_mt("console");
-
   console->info(PROJECT_NAME " version " PROJECT_VERSION);
 
-  try
+  //setup SDL stuff
+
+  bool quit = false;
+  while( !quit )
   {
-    SDL2pp::SDL sdl(SDL_INIT_VIDEO | SDL_INIT_AUDIO);
-    SDL2pp::Window window("libSDL2pp demo",
-                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                640, 480, SDL_WINDOW_RESIZABLE);
-    SDL2pp::Renderer renderer(window, -1, SDL_RENDERER_ACCELERATED);
-    SDL_Delay(2000);
-  }
-  catch(SDL2pp::Exception& ex)
-  {
-    console->error(ex.GetSDLError());
-  }
-  catch(std::exception& ex)
-  {
-    console->error(ex.what());
+    
+/*
+  process_events()
+    window_manager->process_events();
+      this handles like close etc.
+    input_manager->process_events();
+      entityx.input_system.raise( ... );
+      entityx.gui_system.raise( ... );
+    network_manager->process_events();
+      entityx.networksystem.raise( ... );
+
+  game_logic();
+    entityx.systems[ ... ].process();
+
+  render();
+    scene->render( tex.new );
+    gui->render( tex.new );
+    gpu->flip( tex.old, tex.new );
+*/
   }
 
   return 0;

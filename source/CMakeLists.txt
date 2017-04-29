@@ -39,9 +39,12 @@ set(CMAKE_INSTALL_RPATH "${ARTIFACT_DIRECTORY}/lib")
 
 target_link_libraries(
   ${PROJECT_NAME} PUBLIC
-  SDL2pp  
+  gainput
+  SDL2pp
   SDL2
   SDL2main
   dl
+  X11
+  libGL.so
   ${LIBRARY_PTHREAD}
 )
