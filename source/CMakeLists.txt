@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.5)
 
 set(SOURCE
   main.cc
+  platform/application.cc
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})

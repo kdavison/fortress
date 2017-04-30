@@ -1,29 +1,15 @@
+#include "platform/application.h"
 #include <spdlog/spdlog.h>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
-#include <SDL2/SDL_opengl.h>
-#include <GL/gl.h>
-
-#include "input/input.h"
-
-#include <functional>
-#include <unordered_map>
-#include <thread>
-#include <chrono>
-#include <cmath>
+#include <memory>
 
 int main()
 {
   auto console = spdlog::stdout_color_mt("console");
-  console->info(PROJECT_NAME " version " PROJECT_VERSION);
 
-  //setup SDL stuff
-
+/*
   bool quit = false;
   while( !quit )
   {
-    
-/*
   process_events()
     window_manager->process_events();
       this handles like close etc.
@@ -40,8 +26,17 @@ int main()
     scene->render( tex.new );
     gui->render( tex.new );
     gpu->flip( tex.old, tex.new );
-*/
   }
+*/
+
+/*
+
+1. collect all input events from OS/Hardware
+2. feed raw input into context chain
+     raw -> context -> normalized events
+3. feed list of events to application code
+
+*/
 
   return 0;
 }
