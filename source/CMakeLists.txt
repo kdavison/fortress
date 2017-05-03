@@ -2,7 +2,11 @@ cmake_minimum_required (VERSION 3.5)
 
 set(SOURCE
   main.cc
-  platform/application.cc
+##platform
+  platform/platformEvent.cc
+##input handling
+##gui
+##renderer
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
@@ -41,7 +45,11 @@ set(CMAKE_INSTALL_RPATH "${ARTIFACT_DIRECTORY}/lib")
 target_link_libraries(
   ${PROJECT_NAME} PUBLIC
   gainput
-  SDL2pp
+  CEGUICoreWindowRendererSet
+  CEGUIExpatParser
+  CEGUIBase-0
+  CEGUICommonDialogs-0
+  CEGUIOpenGLRenderer-0
   SDL2
   SDL2main
   dl
