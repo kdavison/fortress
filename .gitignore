@@ -37,9 +37,11 @@ cmake.*/
 
 #ignore artifact directoty
 !/artifact
+/artifact/*
 !/artifact/.gitkeep
 
 #ignore specific external projects
 ##SDL
 external/SDL2-*
 external/ex-project*
+external/cegui-*/
