@@ -36,7 +36,8 @@ CMakeFiles/
 cmake.*/
 
 #ignore artifact directoty
-artifact/*
+!/artifact
+!/artifact/.gitkeep
 
 #ignore specific external projects
 ##SDL
