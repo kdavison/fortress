@@ -1,7 +1,14 @@
 cmake_minimum_required (VERSION 3.5)
 project(fortress)
 
-## VERSIONING
+##
+# OPTIONS
+##
+option(FORTRESS_TEST "build tests" ON) #BUILD TEST LIBRARY?
+
+##
+# VERSIONING
+##
 set(${PROJECT_NAME}_VERSION_MAJOR "0")
 set(${PROJECT_NAME}_VERSION_MINOR "0")
 set(${PROJECT_NAME}_VERSION_PATCH "0")
@@ -10,16 +17,22 @@ add_definitions(-DPROJECT_NAME=${PROJECT_NAME})
 add_definitions(-DPROJECT_VERSION=${${PROJECT_NAME}_VERSION})
 add_definitions(-DHOST_SYSTEM_NAME=${CMAKE_HOST_SYSTEM_NAME})
 
-## OUTPUT PATHS
+message("=== ${PROJECT_NAME} - ${${PROJECT_NAME}_VERSION} ===")
+
+##
+# CMAKE CONFIGURATION
+##
+set(CMAKE_CXX_STANDARD 14)
 set(ARTIFACT_DIRECTORY ${CMAKE_SOURCE_DIR}/artifact)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${ARTIFACT_DIRECTORY}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${ARTIFACT_DIRECTORY}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ARTIFACT_DIRECTORY}/bin)
+set(CMAKE_INSTALL_RPATH "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-## MINIMUM C++ VERSION
-set (CMAKE_CXX_STANDARD 14)
-
-## THREADING PACKAGE
+##
+# Find Threading Package
+##
 find_package(Threads REQUIRED)
 if(THREADS_HAVE_PTHREAD_ARG)
   set(COMPILE_PTHREAD "-pthread")
@@ -28,24 +41,29 @@ if(CMAKE_THREAD_LIBS_INIT)
   set(LIBRARY_PTHREAD ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-## project name and version
-message(STATUS "=== ${PROJECT_NAME} - ${${PROJECT_NAME}_VERSION} ===")
-#set library paths!
-set(CMAKE_INSTALL_RPATH "${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}")
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-## SHOULD WE BUILD THE TEST LIBRARY?!
-option(FORTRESS_TEST "build tests" ON)
-
-#include all the stuff in external/*
-file(GLOB EXTERNAL_PROJECTS
-  "external/*.cmake"
+##
+# Include External Projects
+##
+set(EXTERNAL_PROJECTS
+  yaml-cpp
+  spdlog
+  sdl2
+  glew
+  cegui
+  entityx
+  googletest
+  protobuf
 )
-message(STATUS "including external projects:")
+
+message(STATUS "External Projects:")
 foreach(project ${EXTERNAL_PROJECTS})
   message(STATUS "    ${project}")
-  include(${project})
+  include(external/${project}.cmake)
 endforeach(project)
 
+##
+# TARGETS
+##
 add_subdirectory(source)
-add_subdirectory(test)
+#add_subdirectory(test)
+

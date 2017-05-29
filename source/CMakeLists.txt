@@ -2,16 +2,11 @@ cmake_minimum_required (VERSION 3.5)
 
 set(SOURCE
   main.cc
-##platform
-  platform/platformEvent.cc
-##input handling
-##gui
-##renderer
 )
 
 add_executable(${PROJECT_NAME} ${SOURCE})
 add_dependencies(${PROJECT_NAME}
-  spdlog
+  project_spdlog
 )
 
 target_compile_options(
@@ -32,28 +27,20 @@ ENDMACRO()
 
 SUBDIRLIST(INCLUDE_DIRECTORIES ${ARTIFACT_DIRECTORY}/include)
 
+
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
   ${ARTIFACT_DIRECTORY}/include
   ${INCLUDE_DIRECTORIES}
 )
 
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
-set(CMAKE_INSTALL_RPATH "${ARTIFACT_DIRECTORY}/lib")
-
-target_link_libraries(
-  ${PROJECT_NAME} PUBLIC
-  gainput
-  CEGUICoreWindowRendererSet
-  CEGUIExpatParser
-  CEGUIBase-0
-  CEGUICommonDialogs-0
-  CEGUIOpenGLRenderer-0
-  SDL2
-  SDL2main
+link_directories(${CMAKE_SOURCE_DIR}/artifact/lib)
+target_link_libraries(${PROJECT_NAME}
+  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUICommonDialogs-0.so
+  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUIOpenGLRenderer-0.so
+  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUIBase-0.so
+  ${CMAKE_SOURCE_DIR}/artifact/lib/libSDL2.so
+  GL
   dl
-  X11
-  libGL.so
   ${LIBRARY_PTHREAD}
 )

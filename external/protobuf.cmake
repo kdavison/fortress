@@ -4,8 +4,10 @@ include(ExternalProject)
 set(PROTOBUF_CMAKE_OPTIONS
   -Dprotobuf_BUILD_TESTS=OFF
   -Dprotobuf_BUILD_EXAMPLES=OFF
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
   -DCMAKE_INSTALL_PREFIX=${ARTIFACT_DIRECTORY}
 )
+
 ExternalProject_Add(
   project_protobuf
   CMAKE_ARGS "${PROTOBUF_CMAKE_OPTIONS}"
@@ -15,8 +17,5 @@ ExternalProject_Add(
   BUILD_IN_SOURCE 1
   TEST_BEFORE_INSTALL 1
   TEST_COMMAND $(MAKE) check
+  INSTALL_DIR ${ARTIFACT_DIRECTORY}
 )
-
-add_library(protobuf SHARED IMPORTED)
-set_property(TARGET protobuf PROPERTY IMPORTED_LOCATION ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libprotobuf.so)
-add_dependencies(protobuf project_protobuf)
