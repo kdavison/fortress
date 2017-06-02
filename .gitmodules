@@ -19,3 +19,6 @@
 [submodule "external/glew"]
 	path = external/glew
 	url = git@github.com:nigels-com/glew.git
+[submodule "external/cef"]
+	path = external/cef
+	url = https://bitbucket.org/chromiumembedded/cef.git
