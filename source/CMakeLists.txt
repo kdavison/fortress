@@ -1,5 +1,13 @@
 cmake_minimum_required (VERSION 3.5)
 
+##
+## Setup RPATH stuff
+##
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 set(SOURCE
   main.cc
 )
@@ -7,7 +15,11 @@ set(SOURCE
 add_executable(${PROJECT_NAME} ${SOURCE})
 add_dependencies(${PROJECT_NAME}
   project_spdlog
+  project_glfw
+  project_glm
+  project_vulkan
 )
+
 
 target_compile_options(
   ${PROJECT_NAME} PUBLIC
@@ -34,12 +46,19 @@ target_include_directories(
   ${INCLUDE_DIRECTORIES}
 )
 
-link_directories(${CMAKE_SOURCE_DIR}/artifact/lib)
+link_directories(
+  ${ARTIFACT_DIRECTORY}/lib
+  ${ARTIFACT_DIRECTORY}/shared  
+)
 target_link_libraries(${PROJECT_NAME}
-  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUICommonDialogs-0.so
-  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUIOpenGLRenderer-0.so
-  ${CMAKE_SOURCE_DIR}/artifact/lib/libCEGUIBase-0.so
-  ${CMAKE_SOURCE_DIR}/artifact/lib/libSDL2.so
+  ${ARTIFACT_DIRECTORY}/lib/libglfw3.a
+  ${ARTIFACT_DIRECTORY}/lib/libvulkan.so
+  X11
+  Xcursor
+  Xrandr
+  Xi
+  Xinerama
+  Xxf86vm
   GL
   dl
   ${LIBRARY_PTHREAD}

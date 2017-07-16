@@ -9,6 +9,7 @@ set(SPEED_LOG_OPTIONS
 
 ExternalProject_Add(
   project_spdlog
+  PREFIX spdlog
   CMAKE_ARGS "${SPEED_LOG_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/spdlog"
   INSTALL_DIR ${ARTIFACT_DIRECTORY}

@@ -1,324 +1,376 @@
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+
+#include <vector>
+#include <string>
+#include <memory>
+#include <stdexcept>
+#include <algorithm>
+#include <cstring>
+#include <set>
+
 #include <iostream>
 
-#include <CEGUI/CEGUI.h>
-#include <CEGUI/RendererModules/OpenGL/GL3Renderer.h>
-
-#include <SDL.h>
-#include <SDL_opengl.h>
-
-#define XSTRINGIFY(x) STRINGIFY(x)
-#define STRINGIFY(x) #x
-
-namespace
+class Application
 {
+public:
+  virtual void run() = 0;
+};
 
-static SDL_Window* window;
-static SDL_GLContext context;
+const std::vector<const char*> validationLayers =
+#if NDEBUG
+{ };
+#else
+{
+  "VK_LAYER_LUNARG_standard_validation"
+};
+#endif
 
-static const std::string WINDOW_TITLE = XSTRINGIFY(PROJECT_NAME) "-" XSTRINGIFY(PROJECT_VERSION) "-" XSTRINGIFY(HOST_SYSTEM_NAME);
+const std::vector<const char*> deviceExtensions = {
+  VK_KHR_SWAPCHAIN_EXTENSION_NAME
+};
 
-static const std::string DATAFILES = "share/cegui-0";
+bool checkValidationLayerSupport() {
+  uint32_t layer_count = 0;
+  vkEnumerateInstanceLayerProperties(&layer_count, nullptr);
+  std::vector<VkLayerProperties> availableLayers(layer_count);
+  vkEnumerateInstanceLayerProperties(&layer_count, availableLayers.data());
 
+  std::cout << "available validation layers: " << layer_count << "\n";
+
+  for(const char* layer_name : validationLayers) {
+    std::cout << "checking validation layer: " << std::string(layer_name) << "\n";
+    auto found = std::find_if(std::begin(availableLayers), std::end(availableLayers),
+                      [layer_name](auto const& layer) {
+                        return (std::strcmp(layer_name, layer.layerName) == 0);
+                      });
+  }
+  return true;
 }
 
-CEGUI::Key::Scan toCEGUIKey(SDL_Scancode key)
-{
-    switch (key)
-    {
-    case SDL_SCANCODE_ESCAPE: return CEGUI::Key::Escape;
-    case SDL_SCANCODE_F1: return CEGUI::Key::F1;
-    case SDL_SCANCODE_F2: return CEGUI::Key::F2;
-    case SDL_SCANCODE_F3: return CEGUI::Key::F3;
-    case SDL_SCANCODE_F4: return CEGUI::Key::F4;
-    case SDL_SCANCODE_F5: return CEGUI::Key::F5;
-    case SDL_SCANCODE_F6: return CEGUI::Key::F6;
-    case SDL_SCANCODE_F7: return CEGUI::Key::F7;
-    case SDL_SCANCODE_F8: return CEGUI::Key::F8;
-    case SDL_SCANCODE_F9: return CEGUI::Key::F9;
-    case SDL_SCANCODE_F10: return CEGUI::Key::F10;
-    case SDL_SCANCODE_F11: return CEGUI::Key::F11;
-    case SDL_SCANCODE_F12: return CEGUI::Key::F12;
-    case SDL_SCANCODE_F13: return CEGUI::Key::F13;
-    case SDL_SCANCODE_F14: return CEGUI::Key::F14;
-    case SDL_SCANCODE_F15: return CEGUI::Key::F15;
-    case SDL_SCANCODE_UP: return CEGUI::Key::ArrowUp;
-    case SDL_SCANCODE_DOWN: return CEGUI::Key::ArrowDown;
-    case SDL_SCANCODE_LEFT: return CEGUI::Key::ArrowLeft;
-    case SDL_SCANCODE_RIGHT: return CEGUI::Key::ArrowRight;
-    case SDL_SCANCODE_LSHIFT: return CEGUI::Key::LeftShift;
-    case SDL_SCANCODE_RSHIFT: return CEGUI::Key::RightShift;
-    case SDL_SCANCODE_LCTRL: return CEGUI::Key::LeftControl;
-    case SDL_SCANCODE_RCTRL: return CEGUI::Key::RightControl;
-    case SDL_SCANCODE_LALT: return CEGUI::Key::LeftAlt;
-    case SDL_SCANCODE_RALT: return CEGUI::Key::RightAlt;
-    case SDL_SCANCODE_TAB: return CEGUI::Key::Tab;
-    case SDL_SCANCODE_RETURN: return CEGUI::Key::Return;
-    case SDL_SCANCODE_BACKSPACE: return CEGUI::Key::Backspace;
-    case SDL_SCANCODE_INSERT: return CEGUI::Key::Insert;
-    case SDL_SCANCODE_DELETE: return CEGUI::Key::Delete;
-    case SDL_SCANCODE_PAGEUP: return CEGUI::Key::PageUp;
-    case SDL_SCANCODE_PAGEDOWN: return CEGUI::Key::PageDown;
-    case SDL_SCANCODE_HOME: return CEGUI::Key::Home;
-    case SDL_SCANCODE_END: return CEGUI::Key::End;
-    case SDL_SCANCODE_KP_ENTER: return CEGUI::Key::NumpadEnter;
-    case SDL_SCANCODE_SPACE: return CEGUI::Key::Space;
-    case SDL_SCANCODE_A: return CEGUI::Key::A;
-    case SDL_SCANCODE_B: return CEGUI::Key::B;
-    case SDL_SCANCODE_C: return CEGUI::Key::C;
-    case SDL_SCANCODE_D: return CEGUI::Key::D;
-    case SDL_SCANCODE_E: return CEGUI::Key::E;
-    case SDL_SCANCODE_F: return CEGUI::Key::F;
-    case SDL_SCANCODE_G: return CEGUI::Key::G;
-    case SDL_SCANCODE_H: return CEGUI::Key::H;
-    case SDL_SCANCODE_I: return CEGUI::Key::I;
-    case SDL_SCANCODE_J: return CEGUI::Key::J;
-    case SDL_SCANCODE_K: return CEGUI::Key::K;
-    case SDL_SCANCODE_L: return CEGUI::Key::L;
-    case SDL_SCANCODE_M: return CEGUI::Key::M;
-    case SDL_SCANCODE_N: return CEGUI::Key::N;
-    case SDL_SCANCODE_O: return CEGUI::Key::O;
-    case SDL_SCANCODE_P: return CEGUI::Key::P;
-    case SDL_SCANCODE_Q: return CEGUI::Key::Q;
-    case SDL_SCANCODE_R: return CEGUI::Key::R;
-    case SDL_SCANCODE_S: return CEGUI::Key::S;
-    case SDL_SCANCODE_T: return CEGUI::Key::T;
-    case SDL_SCANCODE_U: return CEGUI::Key::U;
-    case SDL_SCANCODE_V: return CEGUI::Key::V;
-    case SDL_SCANCODE_W: return CEGUI::Key::W;
-    case SDL_SCANCODE_X: return CEGUI::Key::X;
-    case SDL_SCANCODE_Y: return CEGUI::Key::Y;
-    case SDL_SCANCODE_Z: return CEGUI::Key::Z;
-    case SDL_SCANCODE_1: return CEGUI::Key::One;
-    case SDL_SCANCODE_2: return CEGUI::Key::Two;
-    case SDL_SCANCODE_3: return CEGUI::Key::Three;
-    case SDL_SCANCODE_4: return CEGUI::Key::Four;
-    case SDL_SCANCODE_5: return CEGUI::Key::Five;
-    case SDL_SCANCODE_6: return CEGUI::Key::Six;
-    case SDL_SCANCODE_7: return CEGUI::Key::Seven;
-    case SDL_SCANCODE_8: return CEGUI::Key::Eight;
-    case SDL_SCANCODE_9: return CEGUI::Key::Nine;
-    case SDL_SCANCODE_0: return CEGUI::Key::Zero;
-    default: return CEGUI::Key::Unknown;
+std::vector<const char*> getRequiredExtensions() {
+  std::vector<const char*> extensions;
+  uint32_t glfwExtensionCount = 0;
+  const char** glfwExtensions;
+  glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+  for(uint32_t index = 0; index < glfwExtensionCount; ++index)
+  {
+    extensions.push_back(glfwExtensions[index]);
+  }
+  if(!validationLayers.empty())
+  {
+    extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
+  }
+  return extensions;
+}
+
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugReportFlagsEXT msgFlags, VkDebugReportObjectTypeEXT objType, uint64_t srcObject,
+                                       size_t location, int32_t msgCode, const char *pLayerPrefix, const char *pMsg,
+                                       void *pUserData) {
+
+    std::cerr << "validation layer: " << std::string(pMsg) << std::endl;
+
+    return VK_FALSE;
+}
+
+VkResult CreateDebugReportCallbackEXT(
+  VkInstance instance,
+  const VkDebugReportCallbackCreateInfoEXT* pCreateInfo,
+  const VkAllocationCallbacks* pAllocator,
+  VkDebugReportCallbackEXT* pCallback) {
+    auto func = (PFN_vkCreateDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugReportCallbackEXT");
+    if (func != nullptr) {
+        return func(instance, pCreateInfo, pAllocator, pCallback);
+    } else {
+        return VK_ERROR_EXTENSION_NOT_PRESENT;
     }
 }
 
-void initSDL()
-{
-    // init everything from SDL
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
-    {
-        std::cerr << "SDL could not be initialized!" << std::endl
-            << "Error message: " << SDL_GetError() << std::endl;
-        exit(1);
-    }
-
-    // create opengl window with size of 800x600px
-    window = SDL_CreateWindow( WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-                              800, 600, SDL_WINDOW_SHOWN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
-    if (!window)
-    {
-        std::cerr << "Could not create SDL window: " << SDL_GetError() << std::endl;
-        SDL_Quit();
-        exit(1);
-    }
-
-    // disable native mouse cursor
-    SDL_ShowCursor(0);
-
-    // setup opengl rendering context
-    context = SDL_GL_CreateContext(window);
-}
-
-void initCEGUI()
-{
-    using namespace CEGUI;
-
-    // create renderer and enable extra states
-    OpenGL3Renderer& cegui_renderer = OpenGL3Renderer::create(Sizef(800.f, 600.f));
-    cegui_renderer.enableExtraStateSettings(true);
-
-    // create CEGUI system object
-    CEGUI::System::create(cegui_renderer);
-
-    // setup resource directories
-    DefaultResourceProvider* rp = static_cast<DefaultResourceProvider*>(System::getSingleton().getResourceProvider());
-    rp->setResourceGroupDirectory("schemes",      DATAFILES + "/schemes/");
-    rp->setResourceGroupDirectory("imagesets",    DATAFILES + "/imagesets/");
-    rp->setResourceGroupDirectory("fonts",        DATAFILES + "/fonts/");
-    rp->setResourceGroupDirectory("layouts",      DATAFILES + "/layouts/");
-    rp->setResourceGroupDirectory("looknfeels",   DATAFILES + "/looknfeel/");
-    rp->setResourceGroupDirectory("lua_scripts",  DATAFILES + "/lua_scripts/");
-    rp->setResourceGroupDirectory("schemas",      DATAFILES + "/xml_schemas/");
-
-    // set default resource groups
-    ImageManager::setImagesetDefaultResourceGroup("imagesets");
-    Font::setDefaultResourceGroup("fonts");
-    Scheme::setDefaultResourceGroup("schemes");
-    WidgetLookManager::setDefaultResourceGroup("looknfeels");
-    WindowManager::setDefaultResourceGroup("layouts");
-    ScriptModule::setDefaultResourceGroup("lua_scripts");
-
-    XMLParser* parser = System::getSingleton().getXMLParser();
-    if (parser->isPropertyPresent("SchemaDefaultResourceGroup"))
-        parser->setProperty("SchemaDefaultResourceGroup", "schemas");
-
-    // load TaharezLook scheme and DejaVuSans-10 font
-    SchemeManager::getSingleton().createFromFile("TaharezLook.scheme", "schemes");
-    FontManager::getSingleton().createFromFile("DejaVuSans-10.font");
-
-    // set default font and cursor image and tooltip type
-    System::getSingleton().getDefaultGUIContext().setDefaultFont("DejaVuSans-10");
-    System::getSingleton().getDefaultGUIContext().getMouseCursor().setDefaultImage("TaharezLook/MouseArrow");
-    System::getSingleton().getDefaultGUIContext().setDefaultTooltipType("TaharezLook/Tooltip");
-}
-
-void initWindows()
-{
-    using namespace CEGUI;
-
-    /////////////////////////////////////////////////////////////
-    // Add your gui initialisation code in here.
-    // You can use the following code as an inspiration for
-    // creating your own windows.
-    // But you should preferably use layout loading because you won't
-    // have to recompile everytime you change the layout.
-    /////////////////////////////////////////////////////////////
-
-    // load layout
-    Window* root = WindowManager::getSingleton().loadLayoutFromFile("application_templates.layout");
-    System::getSingleton().getDefaultGUIContext().setRootWindow(root);
-}
-
-// convert SDL mouse button to CEGUI mouse button
-CEGUI::MouseButton SDLtoCEGUIMouseButton(const Uint8& button)
-{
-    using namespace CEGUI;
-
-    switch (button)
-    {
-    case SDL_BUTTON_LEFT:
-        return LeftButton;
-        
-    case SDL_BUTTON_MIDDLE:
-        return MiddleButton;
-
-    case SDL_BUTTON_RIGHT:
-        return RightButton;
-
-    default:
-        return NoButton;
+void DestroyDebugReportCallbackEXT(VkInstance instance, VkDebugReportCallbackEXT callback, const VkAllocationCallbacks* pAllocator) {
+    auto func = (PFN_vkDestroyDebugReportCallbackEXT) vkGetInstanceProcAddr(instance, "vkDestroyDebugReportCallbackEXT");
+    if (func != nullptr) {
+        func(instance, callback, pAllocator);
     }
 }
 
-int main(int argc, char* argv[])
+class HelloTriangleApplication
+  : public Application
 {
-    using namespace CEGUI;
+public:
+  void run() {
+    init_window(512, 512);
+    init_vulkan();
+    main_loop();
+    cleanup();  
+  }
+private:
+  void init_window(std::size_t width, std::size_t height)
+  {
+    glfwInit();
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    _window = glfwCreateWindow(width, height, "Vulkan", nullptr, nullptr);
+  }
 
-    // init SDL
-    initSDL();
-
-    // init cegui
-    initCEGUI();
-
-    // notify system of the window size
-    System::getSingleton().notifyDisplaySizeChanged(Sizef(800.f, 600.f));
-
-    // initialise windows and setup layout
-    initWindows();
-
-    // set gl clear color
-    glClearColor(0, 0, 0, 255);
-
-    bool quit = false;
-    SDL_Event event;
-    float time = SDL_GetTicks() / 1000.f;
-
-    OpenGL3Renderer* renderer = static_cast<OpenGL3Renderer*>(System::getSingleton().getRenderer());
-
-    // repeat until a quit is requested
-    while (!quit && !SDL_QuitRequested())
+  void init_vulkan()
+  {
+    if(!checkValidationLayerSupport())
     {
-        // query and process events
-        while (SDL_PollEvent(&event))
-        {
-            switch (event.type)
-            {
-            case SDL_QUIT:
-                quit = true;
-                break;
-            
-            case SDL_MOUSEMOTION:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectMousePosition(static_cast<float>(event.motion.x),
-                                                                                         static_cast<float>(event.motion.y));
-                break;
-
-            case SDL_MOUSEBUTTONDOWN:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonDown(SDLtoCEGUIMouseButton(event.button.button));
-                break;
-
-            case SDL_MOUSEBUTTONUP:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseButtonUp(SDLtoCEGUIMouseButton(event.button.button));
-                break;
-
-            case SDL_MOUSEWHEEL:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectMouseWheelChange(static_cast<float>(event.wheel.y));
-                break;
-
-            case SDL_KEYDOWN:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectKeyDown(toCEGUIKey(event.key.keysym.scancode));
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectChar(event.key.keysym.sym);
-                break;
-
-            case SDL_KEYUP:
-                CEGUI::System::getSingleton().getDefaultGUIContext().injectKeyUp(toCEGUIKey(event.key.keysym.scancode));
-                break;
-
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED)
-                {
-                    System::getSingleton().notifyDisplaySizeChanged(Sizef(static_cast<float>(event.window.data1),
-                                                                          static_cast<float>(event.window.data2)));
-                    glViewport(0, 0, event.window.data1, event.window.data2);
-                }
-                break;
-
-            default:
-                break;
-
-            }
-        }
-
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // inject time pulses
-        const float newtime = SDL_GetTicks() / 1000.f;
-        const float time_elapsed = newtime - time;
-        System::getSingleton().injectTimePulse(time_elapsed);
-        System::getSingleton().getDefaultGUIContext().injectTimePulse(time_elapsed);
-        time = newtime;
-
-        // render gui
-        renderer->beginRendering();
-        System::getSingleton().renderAllGUIContexts();
-        renderer->endRendering();
-
-        // swap buffers
-        SDL_GL_SwapWindow(window);
+      throw std::runtime_error("validation layer request, but not supported!");
     }
 
-    // destroy system and renderer
-    System::destroy();
-    OpenGL3Renderer::destroy(*renderer);
-    renderer = 0;
+    //create application info
+    VkApplicationInfo appInfo = {};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Hello Triangle!";
+    appInfo.applicationVersion = VK_MAKE_VERSION(0, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(0, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
 
-    // delete SDL GL context
-    SDL_GL_DeleteContext(context);
+    //create constructor info
+    VkInstanceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
 
-    // destroy SDL window
-    SDL_DestroyWindow(window);
+    auto glfwExtensions = getRequiredExtensions();
+    createInfo.enabledExtensionCount = glfwExtensions.size();
+    createInfo.ppEnabledExtensionNames = glfwExtensions.data();
 
-    // cleanup SDL
-    SDL_Quit();
+    if(!validationLayers.empty()) {
+      createInfo.enabledLayerCount = validationLayers.size();
+      createInfo.ppEnabledLayerNames = validationLayers.data();
+    } else {
+      createInfo.enabledLayerCount = 0;
+    }
 
-    return 0;
+    //create instance!
+    VkResult result = vkCreateInstance(&createInfo, nullptr, &_instance);
+    if(result != VK_SUCCESS)
+    {
+      throw std::runtime_error("failed to create instance(" + std::to_string(result) + ")");
+    }
+
+    uint32_t vulkanExtensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &vulkanExtensionCount, nullptr);
+    std::vector<VkExtensionProperties> extensions(vulkanExtensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &vulkanExtensionCount, extensions.data());
+
+    std::cout << "available extensions:\n";
+    for(const auto& extension : extensions)
+    {
+      std::cout << "\t" << extension.extensionName << "\n";
+    }
+
+    //setup debug callback
+    if(!validationLayers.empty())
+    {
+      VkDebugReportCallbackCreateInfoEXT debugCallbackCreateInfo = {};
+      debugCallbackCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+      debugCallbackCreateInfo.pNext = nullptr;
+      debugCallbackCreateInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+      debugCallbackCreateInfo.pfnCallback = debugCallback;
+      debugCallbackCreateInfo.pUserData = nullptr;
+
+      if(CreateDebugReportCallbackEXT(_instance, &debugCallbackCreateInfo, nullptr, &_debugCallback) != VK_SUCCESS)
+      {
+        throw std::runtime_error("debug callback setup failed");
+      }
+    }
+
+    create_surface();
+
+    pick_physical_device();
+    create_logical_device();
+  }
+
+  void create_surface() {
+    if(glfwCreateWindowSurface(_instance, _window, nullptr, &_surface) != VK_SUCCESS) {
+      throw std::runtime_error("failed to create window surface!");
+    }
+  }
+
+  void pick_physical_device()
+  {
+    _physicalDevice = VK_NULL_HANDLE;
+    uint32_t device_count = 0;
+    vkEnumeratePhysicalDevices(_instance, &device_count, nullptr);
+    if(device_count == 0) {
+      throw std::runtime_error("failed to find GPUs with vulkan support");
+    }
+    std::vector<VkPhysicalDevice> devices(device_count);
+    vkEnumeratePhysicalDevices(_instance, &device_count, devices.data());
+
+    for(const auto& device : devices) {
+      if(isDeviceSuitable(device)) {
+        _physicalDevice = device;
+        break;
+      }
+    }
+    if(_physicalDevice == VK_NULL_HANDLE) {
+      throw std::runtime_error("failed to find suitable GPU!");
+    }
+  }
+
+  struct QueueFamilyIndices
+  {
+    int32_t graphicsFamily = -1;
+    int32_t presentFamily = -1;
+    bool isComplete() {
+      return graphicsFamily >= 0 && presentFamily >= 0;
+    }
+  };
+
+  QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+  {
+    QueueFamilyIndices indices;
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    int32_t index = 0;
+    for(const auto& queueFamily : queueFamilies) {
+      if(queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+        indices.graphicsFamily = index;
+      }
+      VkBool32 presentSupport = false;
+      vkGetPhysicalDeviceSurfaceSupportKHR(device, index, _surface, &presentSupport);
+      if(queueFamily.queueCount > 0 && presentSupport) {
+        indices.presentFamily = index;
+      }
+      if(indices.isComplete()) {
+        break;
+      } else {
+        ++index;
+      }
+    }
+
+    return indices;
+  }
+
+  bool isDeviceSuitable(VkPhysicalDevice device)
+  {
+    VkPhysicalDeviceProperties device_properties;
+    VkPhysicalDeviceFeatures device_features;
+    vkGetPhysicalDeviceProperties(device, &device_properties);
+    vkGetPhysicalDeviceFeatures(device, &device_features);
+
+    QueueFamilyIndices indices = findQueueFamilies(device);
+
+    return  indices.isComplete() && checkDeviceExtensionSupport(device);
+  }
+
+  bool checkDeviceExtensionSupport(VkPhysicalDevice physicalDevice)
+  {
+    uint32_t extension_count = 0;
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extension_count, nullptr);
+    std::vector<VkExtensionProperties> availableExtensions(extension_count);
+    vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extension_count, availableExtensions.data());
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+    for(const auto& extension : availableExtensions) {
+      requiredExtensions.erase(extension.extensionName);
+    }
+    return requiredExtensions.empty();
+  }
+
+  void create_logical_device()
+  {
+    QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<int32_t> uniqueQueueFamilies = {indices.graphicsFamily, indices.presentFamily};
+
+    for(int32_t queueFamily : uniqueQueueFamilies) {
+      VkDeviceQueueCreateInfo queueCreateInfo = {};
+      queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+      queueCreateInfo.queueFamilyIndex = indices.graphicsFamily;
+      queueCreateInfo.queueCount = 1;
+      queueCreateInfo.pQueuePriorities = &QUEUE_PRIORITY;
+      queueCreateInfos.push_back(queueCreateInfo);
+    }
+
+    VkPhysicalDeviceFeatures deviceFeatures = {};
+
+    VkDeviceCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+    createInfo.pQueueCreateInfos = queueCreateInfos.data();
+    createInfo.pEnabledFeatures = &deviceFeatures;
+
+    createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+    createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+
+    if(validationLayers.size()) {
+      createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+      createInfo.ppEnabledLayerNames = validationLayers.data();
+    } else {
+      createInfo.enabledLayerCount = 0;
+    }
+
+    if(vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
+      throw std::runtime_error("failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(_device, indices.graphicsFamily, 0, &_graphicsQueue);
+  }
+
+  void main_loop()
+  {
+    while(!glfwWindowShouldClose(_window))
+    {
+      glfwPollEvents();
+    }
+  }
+
+  void cleanup() {
+    if(_instance) {
+      if(_debugCallback) {
+        DestroyDebugReportCallbackEXT(_instance, _debugCallback, nullptr);
+      }
+      if(_surface) {
+        vkDestroySurfaceKHR(_instance, _surface, nullptr);
+      }
+      vkDestroyInstance(_instance, nullptr);
+    }
+    if(_device) {
+      vkDestroyDevice(_device, nullptr);
+    }
+    if(_window)
+    {
+      glfwDestroyWindow(_window);
+    }
+    glfwTerminate();
+  }
+
+private:
+  float QUEUE_PRIORITY = 1.0f;
+private:
+  GLFWwindow * _window;
+  VkInstance _instance;
+  VkPhysicalDevice _physicalDevice;
+  VkDevice _device;
+  VkQueue _graphicsQueue;
+  VkDebugReportCallbackEXT _debugCallback;
+  VkSurfaceKHR _surface;
+  VkQueue presentQueue;
+};
+
+int main(int argc, char * argv[])
+{
+  std::unique_ptr<Application> app = std::make_unique<HelloTriangleApplication>(); 
+  try
+  {
+    app->run();
+  }
+  catch(std::runtime_error &ex)
+  {
+    std::cerr << ex.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  return EXIT_SUCCESS;
 }

@@ -11,6 +11,7 @@ set(CEGUI_CMAKE_OPTIONS
 
 ExternalProject_Add(
   project_cegui
+  PREFIX cegui
   URL http://prdownloads.sourceforge.net/crayzedsgui/cegui-0.8.7.zip
   CMAKE_ARGS "${CEGUI_CMAKE_OPTIONS}"
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/external/cegui-0.87

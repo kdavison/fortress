@@ -10,6 +10,7 @@ set(ENTITY_X_OPTIONS
 
 ExternalProject_Add(
   project_entityx
+  PREFIX entityx
   CMAKE_ARGS "${ENTITY_X_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/entityx"
   INSTALL_DIR ${ARTIFACT_DIRECTORY}

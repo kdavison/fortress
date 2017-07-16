@@ -9,6 +9,7 @@ set(YAML_OPTIONS
 
 ExternalProject_Add(
   project_yamlcpp
+  PREFIX yaml-cpp
   CMAKE_ARGS "${YAML_OPTIONS}"
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/yaml-cpp"
   INSTALL_DIR ${ARTIFACT_DIRECTORY}

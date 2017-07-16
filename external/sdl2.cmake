@@ -8,6 +8,7 @@ set(SDL2_CMAKE_OPTIONS
 
 ExternalProject_Add(
   project_sdl2
+  PREFIX sdl2
   HG_REPOSITORY http://hg.libsdl.org/SDL
   CMAKE_ARGS ${SDL2_CMAKE_OPTIONS}
   CONFIGURE_COMMAND ./configure --prefix ${ARTIFACT_DIRECTORY}

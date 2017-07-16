@@ -45,3 +45,5 @@ cmake.*/
 external/SDL2-*
 external/ex-project*
 external/cegui-*/
+external/project_*/
+external/VulkanSDK/*
