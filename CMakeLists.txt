@@ -45,10 +45,7 @@ endif()
 set(EXTERNAL_PROJECTS
   yaml-cpp
   spdlog
-  glfw
-  glm
-  vulkan
-  entityx
+  intrinsic
   googletest
   protobuf
 )
