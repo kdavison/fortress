@@ -12,4 +12,3 @@ ExternalProject_Add(
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/external/googletest"
   INSTALL_DIR ${ARTIFACT_DIRECTORY}
 )
-

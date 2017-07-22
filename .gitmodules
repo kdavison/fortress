@@ -24,4 +24,13 @@
 	url = https://github.com/g-truc/glm.git
 [submodule "external/Intrinsic"]
 	path = external/Intrinsic
-	url = https://github.com/begla/Intrinsic.git
+	url = git@github.com:kdavison/Intrinsic.git
+[submodule "external/glslang"]
+	path = external/glslang
+	url = https://github.com/KhronosGroup/glslang.git
+[submodule "external/cotire"]
+	path = external/cotire
+	url = https://github.com/sakra/cotire.git
+[submodule "cmake/cotire"]
+	path = cmake/cotire
+	url = https://github.com/sakra/cotire.git

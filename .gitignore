@@ -33,7 +33,7 @@ CMakeCache.txt
 CMakeFiles/
 
 #ignore output directory
-cmake.*/
+build.*/
 
 #ignore artifact directoty
 !/artifact
@@ -46,4 +46,4 @@ external/SDL2-*
 external/ex-project*
 external/cegui-*/
 external/project_*/
-external/VulkanSDK/*
+external/VulkanSDK

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BUILD_DIRECTORY_PREFIX=cmake
+BUILD_DIRECTORY_PREFIX=build
 
 function get_cmake_directory()
 {

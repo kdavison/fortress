@@ -45,9 +45,10 @@ endif()
 set(EXTERNAL_PROJECTS
   yaml-cpp
   spdlog
+#  vulkan
   intrinsic
-  googletest
   protobuf
+  googletest
 )
 
 message(STATUS "External Projects:")
